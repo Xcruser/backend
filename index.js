@@ -7,7 +7,7 @@ const port = process.env.PORT || 3001;
 
 // CORS-Konfiguration
 const corsOptions = {
-  origin: 'http://localhost:3000', // Frontend URL
+  origin: ['http://localhost:3000', 'https://website-ivory-alpha-85.vercel.app', 'https://xcruser.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   credentials: true
