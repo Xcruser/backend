@@ -2,14 +2,31 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Express.js Backend-Service für Portfolio-Website mit GitHub Integration, Projekt-Management und automatischer Repository-Synchronisation",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "vercel-build": "echo 'Build step completed'"
   },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "express",
+    "backend",
+    "api",
+    "portfolio",
+    "github"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
     "axios": "^1.6.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 }
