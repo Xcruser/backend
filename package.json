@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Backend service",
+  "description": "Express.js Backend-Service für Portfolio-Website mit GitHub Integration, Projekt-Management und automatischer Repository-Synchronisation",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
