@@ -1,0 +1,12 @@
+### Get GitHub Repositories
+GET https://website-ivory-alpha-85.vercel.app/api/github/repositories
+
+### Get Projects
+GET https://website-ivory-alpha-85.vercel.app/api/projects
+
+### Local Tests
+### Get GitHub Repositories (Local)
+GET http://localhost:3001/api/github/repositories
+
+### Get Projects (Local)
+GET http://localhost:3001/api/projects

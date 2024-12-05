@@ -6,26 +6,20 @@ const axios = require('axios');
 const GITHUB_API = 'https://api.github.com';
 
 // Funktion zum Abrufen und Formatieren der Projekte von GitHub
-async function fetchProjects() {
+async function fetchProjects(username) {
+    console.log('Fetching projects for GitHub username:', username);
+    const githubToken = process.env.GITHUB_TOKEN;
+    
     try {
-        const username = process.env.GITHUB_USERNAME;
-        console.log('Fetching projects for GitHub username:', username);
+        const url = `https://api.github.com/users/${username}/repos`;
+        console.log('Fetching from GitHub URL:', url);
         
-        if (!username) {
-            throw new Error('GitHub Benutzername ist nicht konfiguriert');
-        }
-
-        const githubUrl = `${GITHUB_API}/users/${username}/repos`;
-        console.log('Fetching from GitHub URL:', githubUrl);
-
-        const response = await axios.get(githubUrl, {
+        const response = await axios.get(url, {
             headers: {
                 'Accept': 'application/vnd.github.v3+json',
-                'User-Agent': 'node.js'
+                'Authorization': `Bearer ${githubToken}`
             }
         });
-
-        console.log('GitHub Response:', response.data);
 
         // Formatieren der Repository-Informationen als Projekte
         const projects = response.data.map(repo => ({
@@ -46,7 +40,7 @@ async function fetchProjects() {
         console.log('Formatted projects:', projects);
         return projects;
     } catch (error) {
-        console.error('Fehler beim Abrufen der Projekte:', error.response ? error.response.data : error.message);
+        console.error('Fehler beim Abrufen der Projekte:', error.response?.data || error.message);
         throw error;
     }
 }
@@ -55,7 +49,11 @@ async function fetchProjects() {
 router.get('/', async (req, res) => {
     console.log('GET /api/projects request received');
     try {
-        const projects = await fetchProjects();
+        const username = process.env.GITHUB_USERNAME;
+        if (!username) {
+            throw new Error('GitHub Benutzername ist nicht konfiguriert');
+        }
+        const projects = await fetchProjects(username);
         console.log('Sending projects to client:', projects);
         res.json(projects);
     } catch (error) {
@@ -71,7 +69,11 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     console.log('GET /api/projects/:id request received, id:', req.params.id);
     try {
-        const projects = await fetchProjects();
+        const username = process.env.GITHUB_USERNAME;
+        if (!username) {
+            throw new Error('GitHub Benutzername ist nicht konfiguriert');
+        }
+        const projects = await fetchProjects(username);
         const project = projects.find(p => p.id === parseInt(req.params.id));
         
         if (!project) {

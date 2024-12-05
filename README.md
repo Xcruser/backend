@@ -28,9 +28,10 @@ npm install
 
 # Umgebungsvariablen konfigurieren
 cp .env.example .env
-# Füge deine GitHub-Konfiguration in .env ein:
+# Füge deine Konfiguration in .env ein:
 # GITHUB_USERNAME=dein_username
 # GITHUB_TOKEN=dein_token
+# MONGODB_URI=deine_mongodb_uri
 
 # Server starten
 npm start
@@ -108,33 +109,50 @@ Ruft alle Projektinformationen ab:
 - Links und Technologie-Stack
 - Projektbeschreibungen
 
-## 🛠️ Technologie-Stack
+## 🛠 Technologie-Stack
 
-- **Runtime**: Node.js 20.x
-- **Framework**: Express.js 4.18.2
-- **HTTP-Client**: Axios für GitHub API
-- **Sicherheit**: CORS, Helmet
-- **Caching**: In-Memory Cache
-- **Container**: Docker
+- **Node.js & Express.js**: Backend-Framework
+- **MongoDB & Mongoose**: Datenbank und ODM
+- **UUID**: Generierung eindeutiger IDs
+- **Docker**: Containerisierung
+- **CORS**: Cross-Origin Resource Sharing
+- **dotenv**: Umgebungsvariablen-Management
 
-## 🔒 Umgebungsvariablen
+## 📦 Datenbank-Konfiguration
 
-| Variable | Beschreibung | Erforderlich |
-|----------|-------------|--------------|
-| `PORT` | Server Port | Optional (Standard: 3001) |
-| `GITHUB_USERNAME` | GitHub Benutzername | Ja |
-| `GITHUB_TOKEN` | GitHub Personal Access Token | Optional (empfohlen) |
+Der Service verwendet MongoDB als primäre Datenbank. Stellen Sie sicher, dass Sie eine MongoDB-Instanz haben und die Verbindungs-URL in Ihrer `.env`-Datei konfiguriert ist:
 
-### GitHub Token Einrichtung (Optional)
+```env
+MONGODB_URI=mongodb://username:password@host:port/database
+```
 
-1. Gehe zu GitHub.com -> Settings -> Developer settings
-2. Personal access tokens -> Tokens (classic)
-3. Generate new token (classic)
-4. Benötigte Berechtigungen:
-   - `repo` (Lesezugriff auf Repositories)
-   - `read:user` (Profilinformationen)
+Die Datenbankverbindung wird automatisch beim Serverstart hergestellt und verwaltet Reconnects bei Verbindungsabbrüchen.
 
-**Hinweis**: Ohne Token ist die API auf 60 Requests pro Stunde limitiert und kann nur öffentliche Repositories abrufen.
+## 🔐 Umgebungsvariablen
+
+Kopiere `.env.example` zu `.env` und fülle die folgenden Umgebungsvariablen aus:
+
+```env
+# GitHub Configuration
+GITHUB_USERNAME=       # Dein GitHub Benutzername
+GITHUB_TOKEN=         # Dein GitHub Personal Access Token
+
+# MongoDB Configuration
+MONGODB_URI=          # Deine MongoDB Verbindungs-URL
+
+# Server Configuration (optional)
+PORT=3001            # Der Port auf dem der Server laufen soll (Standard: 3001)
+```
+
+### GitHub Token Berechtigungen
+
+Der GitHub Token benötigt folgende Berechtigungen:
+- `repo` - Für Zugriff auf private Repositories
+- `read:user` - Für Zugriff auf Profilinformationen
+
+## 🔒 Lizenz
+
+Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe die [LICENSE](LICENSE) Datei für Details.
 
 ## 🚀 Deployment
 
@@ -148,6 +166,7 @@ docker build -t portfolio-backend .
 docker run -p 3001:3001 \
   -e GITHUB_USERNAME=dein_username \
   -e GITHUB_TOKEN=dein_token \
+  -e MONGODB_URI=deine_mongodb_uri \
   portfolio-backend
 ```
 
@@ -160,7 +179,3 @@ npm start
 # Der Server läuft auf:
 http://localhost:3001
 ```
-
-## 📄 Lizenz
-
-Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe die [LICENSE](LICENSE) Datei für Details.
