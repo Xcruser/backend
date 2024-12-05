@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 
+// Middleware für Authentifizierung
+const authMiddleware = (req, res, next) => {
+    const authToken = req.headers['x-auth'];
+    const validToken = process.env.AUTH_TOKEN;
+
+    if (!authToken || authToken !== validToken) {
+        return res.status(401).json({ error: 'Nicht authentifiziert' });
+    }
+    next();
+};
+
 // Hilfsfunktion zum Konvertieren von Text in HTML
 function convertToHtml(text) {
     return text
@@ -51,13 +62,27 @@ router.get('/', async (req, res) => {
         }
 
         const posts = await BlogPost.find(query)
-            .select('-content') // Content nicht in der Übersicht senden
-            .sort({ date: -1 }); // Neueste zuerst
+            .select('-content')
+            .sort({ date: -1 });
 
         res.json(posts);
     } catch (error) {
         console.error('Error in GET /api/blog:', error);
         res.status(500).json({ error: 'Failed to fetch blog posts' });
+    }
+});
+
+// GET /api/blog/all - Alle Blog-Posts abrufen (auch unveröffentlichte)
+router.get('/all', authMiddleware, async (req, res) => {
+    try {
+        const posts = await BlogPost.find().sort({ createdAt: -1 });
+        res.json(posts);
+    } catch (error) {
+        console.error('Error in /all endpoint:', error);
+        res.status(500).json({ 
+            message: 'Internal server error',
+            error: error.message 
+        });
     }
 });
 
@@ -73,7 +98,6 @@ router.get('/:slug', async (req, res) => {
             return res.status(404).json({ error: 'Blog post not found' });
         }
 
-        // Konvertiere den Content in HTML
         const postObject = post.toObject();
         postObject.content = convertToHtml(post.content);
 
@@ -85,17 +109,14 @@ router.get('/:slug', async (req, res) => {
 });
 
 // POST /api/blog - Neuen Blog-Post erstellen
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
     try {
-        console.log('Received blog post data:', req.body);
         const { title, excerpt, content, author, tags, published = true } = req.body;
 
         if (!title || !content) {
-            console.log('Validation failed:', { title, content });
-            return res.status(400).json({ error: 'Title and content are required' });
+            return res.status(400).json({ error: 'Titel und Inhalt sind erforderlich' });
         }
 
-        console.log('Creating new blog post with:', { title, excerpt, content, author, tags, published });
         const post = new BlogPost({
             title,
             excerpt: excerpt || title,
@@ -105,28 +126,26 @@ router.post('/', async (req, res) => {
             published
         });
 
-        console.log('Saving blog post...');
         const savedPost = await post.save();
-        console.log('Blog post saved successfully:', savedPost);
         res.status(201).json(savedPost);
     } catch (error) {
         console.error('Error in POST /api/blog:', error);
-        res.status(500).json({ error: 'Failed to create blog post', details: error.message });
+        res.status(500).json({ error: 'Fehler beim Erstellen des Blog-Posts', details: error.message });
     }
 });
 
 // PUT /api/blog/:id - Blog-Post aktualisieren
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     try {
         const { title, excerpt, content, author, tags, published } = req.body;
         const post = await BlogPost.findById(req.params.id);
 
         if (!post) {
-            return res.status(404).json({ error: 'Blog post not found' });
+            return res.status(404).json({ error: 'Blog-Post nicht gefunden' });
         }
 
         if (!title || !content) {
-            return res.status(400).json({ error: 'Title and content are required' });
+            return res.status(400).json({ error: 'Titel und Inhalt sind erforderlich' });
         }
 
         post.title = title;
@@ -142,24 +161,24 @@ router.put('/:id', async (req, res) => {
         res.json(updatedPost);
     } catch (error) {
         console.error('Error in PUT /api/blog/:id:', error);
-        res.status(500).json({ error: 'Failed to update blog post' });
+        res.status(500).json({ error: 'Fehler beim Aktualisieren des Blog-Posts' });
     }
 });
 
 // DELETE /api/blog/:id - Blog-Post löschen
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const post = await BlogPost.findById(req.params.id);
 
         if (!post) {
-            return res.status(404).json({ error: 'Blog post not found' });
+            return res.status(404).json({ error: 'Blog-Post nicht gefunden' });
         }
 
         await post.deleteOne();
         res.status(204).send();
     } catch (error) {
         console.error('Error in DELETE /api/blog/:id:', error);
-        res.status(500).json({ error: 'Failed to delete blog post' });
+        res.status(500).json({ error: 'Fehler beim Löschen des Blog-Posts' });
     }
 });
 

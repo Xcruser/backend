@@ -22,7 +22,7 @@ const blogPostSchema = new mongoose.Schema({
     },
     author: {
         type: String,
-        required: true,
+        default: 'Xcruser',
         trim: true
     },
     tags: [{
